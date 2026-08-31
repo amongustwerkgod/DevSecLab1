@@ -1,4 +1,4 @@
-name: Java CI Build
+name: Java CI Build & Security Scan
 
 on:
   push:
@@ -7,8 +7,12 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-scan:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     steps:
     - name: Checkout repository
@@ -20,5 +24,13 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
